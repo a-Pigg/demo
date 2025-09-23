@@ -1,0 +1,65 @@
+{
+  "id": "3588590",
+  "name": "画板2",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "36738650",
+      "name": "采购管理(2)",
+      "font_class": "purchase",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "36738649",
+      "name": "库存管理(2)",
+      "font_class": "consumables",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "36737537",
+      "name": "区域管理",
+      "font_class": "quyu",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "34967780",
+      "name": "数据备份-未选中",
+      "font_class": "backups",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "34132896",
+      "name": "审核管理-未选中",
+      "font_class": "audit",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "34132897",
+      "name": "首页-未选中",
+      "font_class": "index",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "34132899",
+      "name": "资产管理-未选中",
+      "font_class": "asset",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "34132900",
+      "name": "系统设置-未选中",
+      "font_class": "setting",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    }
+  ]
+}

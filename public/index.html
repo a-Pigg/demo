@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <title>固定资产管理系统</title>
+    <!-- 私有化部署 -->
+    <!-- <script src="./config/config.js"></script> -->
+    <!-- 正式接口 -->
+    <!-- <script src="./onlineConfig/config.js"></script> -->
+    <!-- 197服务器接口 -->
+    <!-- <script src="./localConfig/config.js"></script> -->
+    <!-- 测试接口 -->
+    <script src="./IPconfig.js"></script>
+    <!-- 用户配置文件（私有化） -->
+    <script src="./userConfig/index.js"></script>
+  </head>
+  <body>
+    <noscript>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+      >
+    </noscript>
+    <div id="app">
+      <script>
+        document.getElementsByTagName("title")[0].innerHTML = window.$USER_NAME;
+      </script>
+    </div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>

@@ -1,0 +1,1 @@
+"use strict";(self["webpackChunk_4010_assetweb"]=self["webpackChunk_4010_assetweb"]||[]).push([[1989],{81989:function(e,t,s){s.r(t),s.d(t,{default:function(){return l}});var n=function(){var e=this,t=e._self._c;return t("div",{staticClass:"InventorySettings"},[t("router-view")],1)},u=[],r=s(1001),a={},i=(0,r.Z)(a,n,u,!1,null,"41e0af85",null),l=i.exports}}]);

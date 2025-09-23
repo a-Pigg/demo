@@ -1,0 +1,19 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.printWidth": 150,
+  "prettier.tabWidth": 4,
+  "prettier.useTabs": true,
+  "prettier.semi": true,
+  "prettier.singleQuote": true,
+  "prettier.proseWrap": "preserve",
+  "prettier.arrowParens": "avoid",
+  "prettier.bracketSpacing": true,
+  "prettier.eslintIntegration": false,
+  "prettier.jsxBracketSameLine": false,
+  "prettier.jsxSingleQuote": false,
+  "prettier.requireConfig": false,
+  "prettier.stylelintIntegration": false,
+  "prettier.trailingComma": "es5",
+  "prettier.tslintIntegration": false,
+  "endOfLine": "auto"
+}
