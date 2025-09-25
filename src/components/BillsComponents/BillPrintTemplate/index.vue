@@ -55,6 +55,7 @@ export default {
       this.$emit("setVoucherTag", id);
     },
     async applyPrintTemplate() {
+      console.log('打开模板')
       let canvas = document.createElement("CANVAS");
       for (let i = 0; i < this.voucherPrintTempList.length; i++) {
         if (!this.printTempDialogVisible) {

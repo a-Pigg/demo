@@ -15,7 +15,9 @@
               >
               </el-date-picker>
             </div>
-            <el-button size="small">{{ $t("h.title165") }}</el-button>
+            <el-button size="small" @click="exportFile">{{
+              $t("h.title165")
+            }}</el-button>
           </ds-query-form-left-panel>
           <ds-query-form-right-panel> </ds-query-form-right-panel>
         </ds-query-form>
@@ -162,6 +164,9 @@ import DsPagination from "@/components/DsPagination";
 import DsDefaultPage from "@/components/DsDefaultPage";
 import { mapState } from "vuex";
 import { warehouseOperate } from "@/assets/api";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver"; // 用于下载文件
+
 export default {
   components: {
     DsQueryForm,
@@ -183,7 +188,8 @@ export default {
       defaultPageImgUrl: "",
       defaultPageTips: "",
       loading: false,
-      year: "2023",
+      //year: "2023",
+      year: "2025",
     };
   },
   computed: {
@@ -291,7 +297,155 @@ export default {
           this.$message.error(error);
         });
     },
+    //导出
+    exportFile() {
+      let year = this.year;
+      if (year.length !== 4) {
+        year = new Date(year).getFullYear();
+      }
+
+      warehouseOperate({
+        func: "SOR0000",
+        userId: this.userInfo._id,
+        token: this.userInfo.token,
+        requstData: { year },
+      })
+        .then(({ data }) => {
+          if (data.code === "-1") return this.$message.error(data.data);
+
+          const exportData = data.data;
+          if (!exportData || exportData.length === 0) {
+            return this.$message.warning("暂无数据可导出");
+          }
+          console.log(exportData);
+
+          // 构建 Excel 表格
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("领用明细");
+
+          // 表头定义
+          const headers = [
+            "物品编码",
+            "物品名称",
+            "规格型号",
+            "计量单位",
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月",
+            "合计",
+          ];
+
+          // 字段映射（与 header 对应）
+          const fields = [
+            "code",
+            "name",
+            "specification",
+            "measureUnit",
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+            "total",
+          ];
+
+          // 设置列宽
+          worksheet.columns = headers.map((header, index) => ({
+            header,
+            key: fields[index],
+            width: header === "合计" ? 10 : header.includes("月") ? 8 : 12,
+          }));
+
+          // 添加表头样式
+          const headerRow = worksheet.getRow(1);
+          headerRow.height = 24;
+          headerRow.eachCell((cell) => {
+            cell.font = { name: "SimSun", size: 12, bold: true };
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFC0C0C0" },
+            };
+            cell.alignment = {
+              vertical: "middle",
+              horizontal: "center",
+              wrapText: true,
+            };
+          });
+
+          // 添加数据行
+          exportData.forEach((item) => {
+            // ✅ 关键修复：只取前12个月
+            const counts = (item.counts || []).slice(0, 12);
+            const monthly = Array(12)
+              .fill(0)
+              .map((_, i) => counts[i] || 0);
+            const total = monthly.reduce((a, b) => a + b, 0);
+
+            const row = {
+              code: item.code,
+              name: item.name,
+              specification: item.specification,
+              measureUnit: item.measureUnit,
+              Jan: counts[0] || 0,
+              Feb: counts[1] || 0,
+              Mar: counts[2] || 0,
+              Apr: counts[3] || 0,
+              May: counts[4] || 0,
+              Jun: counts[5] || 0,
+              Jul: counts[6] || 0,
+              Aug: counts[7] || 0,
+              Sep: counts[8] || 0,
+              Oct: counts[9] || 0,
+              Nov: counts[10] || 0,
+              Dec: counts[11] || 0,
+              total: counts.reduce((sum, count) => sum + (count || 0), 0),
+            };
+
+            const excelRow = worksheet.addRow(row);
+            excelRow.height = 20;
+            excelRow.eachCell((cell) => {
+              cell.alignment = {
+                vertical: "middle",
+                horizontal: "center",
+                wrapText: true,
+              };
+            });
+          });
+
+          // 导出文件
+          workbook.xlsx.writeBuffer().then((buffer) => {
+            const blob = new Blob([buffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const fileName = `领用领用表_${year}.xlsx`;
+            saveAs(blob, fileName);
+            this.$message.success(this.$t("h.exportSuccessful"));
+          });
+        })
+        .catch((error) => {
+          console.error("导出失败:", error);
+          this.$message.error("导出失败，请重试");
+        });
+    },
   },
+
   created() {
     this.getUseData();
   },

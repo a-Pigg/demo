@@ -34,7 +34,9 @@
               @click="getHouseSummaryData(warehouseIdData.join(''))"
               >{{ $t("h.Search") }}</el-button
             >
-            <el-button size="small">{{ $t("h.export") }}</el-button>
+            <el-button size="small" @click="exportFile">{{
+              $t("h.export")
+            }}</el-button>
           </ds-query-form-left-panel>
           <ds-query-form-right-panel>
             <!-- <ds-search-btn
@@ -193,6 +195,10 @@
   </div>
 </template>
 <script>
+import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import dayjs from "dayjs";
 import DsQueryForm from "@/components/DsQueryForm";
 import DsQueryFormLeftPanel from "@/components/DsQueryForm/components/DsQueryFormLeftPanel.vue";
 import DsQueryFormRightPanel from "@/components/DsQueryForm/components/DsQueryFormRightPanel.vue";
@@ -201,6 +207,7 @@ import DsPagination from "@/components/DsPagination";
 import DsDefaultPage from "@/components/DsDefaultPage";
 import { warehouseOperate } from "@/assets/api";
 import { mapState } from "vuex";
+import { clickDownloadLink } from "@/utils/basic-methods";
 export default {
   components: {
     DsQueryForm,
@@ -376,6 +383,168 @@ export default {
         .catch((error) => {
           this.$message.error(error);
         });
+    },
+    //导出
+    async exportFile() {
+      try {
+        const res = await warehouseOperate({
+          func: "SR0000",
+          userId: this.userInfo._id,
+          token: this.userInfo.token,
+          requstData: {},
+        });
+
+        const { data } = res;
+        if (data.code === "-1") return this.$message.error(data.data);
+
+        const exportData = data.data;
+        if (!exportData || exportData.length === 0) {
+          return this.$message.warning("暂无数据可导出");
+        }
+        
+        exportData.forEach((row)=>{
+          if(row.image)
+          // console.log(row)
+          row.image = window.$EXCEL_URL + 'image/' + row.image
+        })
+        console.log("exda", exportData);
+        // exportData
+
+        // 表头和字段（顺序一致）
+        const headers = [
+          "仓库",
+          "照片",
+          "物品编码",
+          "物品名称",
+          "物品分类",
+          "商品条码",
+          "规格型号",
+          "计量单位",
+          "入库-数量",
+          "入库-单价",
+          "入库-金额",
+          "出库-数量",
+          "出库-单价",
+          "出库-金额",
+          "结存-数量",
+          "结存-单价",
+          "结存-金额",
+        ];
+
+        const fields = [
+          "houseName",
+          "image",
+          "code",
+          "substanceName",
+          "sortName",
+          "barCode",
+          "specification",
+          "measureUnit",
+          "inAmount",
+          "inPrice",
+          "inMoney",
+          "outAmount",
+          "outPrice",
+          "outMoney",
+          "amount",
+          "price",
+          "money",
+        ];
+
+        // 创建 workbook
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("仓库物品明细");
+
+        // 设置列（第2列是“照片”）
+        worksheet.columns = headers.map((header, index) => ({
+          header: header,
+          key: fields[index],
+          width: header === "照片" ? 20 : 12,
+        }));
+
+        // 表头样式（无边框）
+        const headerRow = worksheet.getRow(1);
+        headerRow.height = 24;
+        headerRow.eachCell((cell) => {
+          cell.font = { name: "SimSun", size: 12, bold: true };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFC0C0C0" },
+          };
+          cell.alignment = {
+            vertical: "middle",
+            horizontal: "center",
+            wrapText: true,
+          };
+        });
+
+        // 添加数据行（照片列留空）
+        exportData.forEach((row) => {
+          const values = fields.map((field) => {
+            if (field === "image") return ""; // 照片列不写 URL
+            let val = row[field];
+            return val == null ? "" : String(val);
+          });
+          const excelRow = worksheet.addRow(values);
+          excelRow.height = 80;
+          excelRow.eachCell((cell) => {
+            cell.alignment = {
+              vertical: "middle",
+              horizontal: "center",
+              wrapText: true,
+            };
+          });
+        });
+
+        // === 嵌入图片（第2列）===
+        for (let i = 0; i < exportData.length; i++) {
+          const imageUrl = exportData[i].image;
+          if (!imageUrl) continue;
+
+          try {
+            const response = await fetch(imageUrl, { mode: "cors" });
+            if (!response.ok) continue;
+
+            const contentType =
+              response.headers.get("content-type") || "image/png";
+            const extMatch = contentType.match(
+              /image\/(jpeg|png|gif|bmp|webp)/
+            );
+            const extension = extMatch ? extMatch[1] : "png";
+
+            const arrayBuffer = await response.arrayBuffer();
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension,
+            });
+
+            // 插入到第2列（B列），行 i+2
+            worksheet.addImage(imageId, {
+              tl: { col: 1, row: i + 1 }, // col 1 = 第2列（0-based）
+              br: { col: 2, row: i + 2 },
+              editAs: "oneCell",
+            });
+          } catch (err) {
+            console.warn("图片加载失败:", imageUrl, err);
+            worksheet.getCell(`B${i + 2}`).value = "图片加载失败";
+          }
+        }
+
+        // 导出文件
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const fileName = `收发存汇总表${dayjs().format(
+          "YYYYMMDD_HHmmss"
+        )}.xlsx`;
+        saveAs(blob, fileName);
+        this.$message.success("导出成功");
+      } catch (error) {
+        console.error("导出失败:", error);
+        this.$message.error("导出失败，请重试");
+      }
     },
   },
   created() {

@@ -74,6 +74,7 @@
               v-if="scope.row[column.prop]"
               :src="scope.row[column.prop]"
               :preview-src-list="[scope.row[column.prop]]"
+              @click="a(scope)"
             ></el-image>
             <div class="no-image" v-else>
               <span>{{ $t("h.title51") }}</span>
@@ -270,6 +271,9 @@ export default {
     },
   },
   methods: {
+    a(scope){
+      console.log('图片',scope)
+    },
     ck2(){
       console.log('点击自定义插槽')
     },

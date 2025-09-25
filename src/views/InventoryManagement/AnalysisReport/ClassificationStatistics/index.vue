@@ -3,7 +3,9 @@
     <el-card class="box-card">
       <!-- 头部 -->
       <div class="header">
-        <el-button size="small">{{ $t("h.exportBtn") }}</el-button>
+        <el-button size="small" @click="exportFile">{{
+          $t("h.exportBtn")
+        }}</el-button>
       </div>
       <!-- 搜索 -->
       <div class="screen">
@@ -139,6 +141,9 @@ import DsFilterDrawer from "@/components/DsFilterDrawer";
 import { ClassificationStatistics } from "@/utils/systemData";
 import { warehouseOperate } from "@/assets/api";
 import { mapState } from "vuex";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import dayjs from 'dayjs'; // 如果还没引入
 export default {
   components: {
     DsQueryForm,
@@ -197,6 +202,117 @@ export default {
     },
   },
   methods: {
+    //导出
+    async exportFile() {
+      try {
+        const res = await warehouseOperate({
+          func: "STR0000",
+          userId: this.userInfo._id,
+          token: this.userInfo.token,
+          requstData: {},
+        });
+
+        const { data } = res;
+        if (data.code === "-1") return this.$message.error(data.data);
+
+        const exportData = data.data;
+        if (!exportData || exportData.length === 0) {
+          return this.$message.warning(this.$t("h.noDataToExport"));
+        }
+
+        // 表头和字段
+        const headers = [
+          "物品分类",
+          "初始数量",
+          "初始金额",
+          "入库数量",
+          "入库金额",
+          "出库数量",
+          "出库金额",
+        ];
+
+        const fields = [
+          "sortingName",
+          "amount",
+          "money",
+          "inAmount",
+          "inMoney",
+          "outAmount",
+          "outMoney",
+        ];
+
+        // 创建 workbook
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("库存分类统计");
+
+        // 设置列
+        worksheet.columns = headers.map((header, index) => ({
+          header: header,
+          key: fields[index],
+          width: 15,
+        }));
+
+        // 表头样式
+        const headerRow = worksheet.getRow(1);
+        headerRow.height = 22;
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true, name: "SimSun", size: 12 };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFD3D3D3" }, // 浅灰色
+          };
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          // cell.border = {
+          //   top: { style: "thin" },
+          //   left: { style: "thin" },
+          //   bottom: { style: "thin" },
+          //   right: { style: "thin" },
+          // };
+        });
+
+        // 填充数据
+        exportData.forEach((row) => {
+          const values = fields.map((field) => {
+            const val = row[field];
+            // 数字类型保留原值，字符串或 null 转为空字符串
+            if (typeof val === "number") return val;
+            return val == null ? "" : String(val);
+          });
+
+          const excelRow = worksheet.addRow(values);
+          excelRow.eachCell((cell, colNumber) => {
+            cell.alignment = { vertical: "middle", horizontal: "center" };
+            // cell.border = {
+            //   top: { style: "thin" },
+            //   left: { style: "thin" },
+            //   bottom: { style: "thin" },
+            //   right: { style: "thin" },
+            // };
+            // 如果是金额或数量列（第2~7列），设置为数字格式
+            if (colNumber >= 2 && colNumber <= 7) {
+              cell.numFmt = "#,##0.00"; // 或 '0.00'，根据需求调整
+            }
+          });
+        });
+
+        // 生成 buffer 并下载
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        const fileName = `库存分类统计_${dayjs().format(
+          "YYYYMMDD_HHmmss"
+        )}.xlsx`;
+        saveAs(blob, fileName);
+
+        this.$message.success(this.$t("h.exportSuccessful"));
+      } catch (error) {
+        console.error("导出失败:", error);
+        this.$message.error(this.$t("h.exportFailed"));
+      }
+    },
     getData() {
       warehouseOperate({
         func: "STR0000",

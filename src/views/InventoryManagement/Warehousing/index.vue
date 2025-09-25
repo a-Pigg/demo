@@ -644,6 +644,7 @@
         :selectId="warehousingTemplateId"
         :voucherPrintTempList="billPrintTemplate"
       ></bill-print-template>
+
       <kc-bill-print-dialog
         ref="vpdRef"
         locationName="warehousingTemplateId"
@@ -657,7 +658,8 @@
 <script>
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import dayjs from 'dayjs';
+import ExcelJS from "exceljs";
+import dayjs from "dayjs";
 import DsQueryForm from "@/components/DsQueryForm";
 import DsQueryFormLeftPanel from "@/components/DsQueryForm/components/DsQueryFormLeftPanel.vue";
 import DsQueryFormRightPanel from "@/components/DsQueryForm/components/DsQueryFormRightPanel.vue";
@@ -678,7 +680,6 @@ import {
 import { getTodayDate } from "@/utils/basic-methods";
 import { warehouseOperate, select } from "@/assets/api";
 import { mapState } from "vuex";
-
 
 export default {
   components: {
@@ -901,7 +902,7 @@ export default {
     openPrintSet() {
       this.$refs["vptRef"].printTempDialogVisible = true;
     },
-    //获取打印模板数据
+    //获取打印模板数据  —— 出库
     getBillPrintTemplate() {
       select({
         func: "S0034",
@@ -2083,6 +2084,7 @@ export default {
       console.log("选择了表格", val);
       //存储选择的数据
       this.selectedRows = val;
+      console.log("存储选择的数据", this.selectedRows);
       this.assetTableSelectData = val;
       this.assetTableSelectData.forEach((item) => {
         item.list[0].amount = item.details[0].amount;
@@ -2202,7 +2204,7 @@ export default {
     //导出
     exportFile() {
       // 有勾选 → 导出勾选；无勾选 → 导出全部
-      if (this.selectedRows.length > 0) {
+      if (this.selectedRows.length == 1) {
         //导出勾选数据
         this.exportSelectedToLocal();
       } else {
@@ -2227,66 +2229,318 @@ export default {
       }
     },
     // 成 Excel 导出勾选数据
-    exportSelectedToLocal() {
-      if (this.selectedRows.length === 0) {
-        this.$message.warning("请先勾选要导出的数据");
+    // exportSelectedToLocal() {
+    //   if (this.selectedRows.length === 0) {
+    //     this.$message.warning("请先勾选要导出的数据");
+    //     return;
+    //   }
+    // 准备数据
+    // const exportData = this.selectedRows.map((row) => ({
+    //   状态: row.statusName || "",
+    //   单据类型:
+    //     row.type === "0" ? "入库单据" : row.type === "1" ? "出库单据" : "",
+    //   业务时间: row.useDate || "",
+    //   业务人: row.useStaffName || "",
+    //   操作人: row.staffName || "",
+    //   创建时间: row.createDate || "",
+    //   仓库: row.houseName || "",
+    //   部门名称: row.deptName || "",
+    //   供应商: row.vendName || "",
+    //   备注: row.remark || "",
+    // }));
+
+    // 创建 workbook 和 worksheet
+    // const workbook = new ExcelJS.Workbook();
+    // const worksheet = workbook.addWorksheet("数据");
+
+    // // 定义列（顺序与 exportData 一致）
+    // const columns = Object.keys(exportData[0] || []);
+    // worksheet.columns = columns.map((key) => ({
+    //   header: key,
+    //   key: key,
+    //   width: 11, // 设置默认列宽
+    // }));
+
+    // // 设置表头样式（第1行）
+    // const headerRow = worksheet.getRow(1);
+    // headerRow.eachCell((cell) => {
+    //   cell.font = {
+    //     name: "SimSun", // 宋体
+    //     size: 14,
+    //     bold: true,
+    //   };
+    //   cell.fill = {
+    //     type: "pattern",
+    //     pattern: "solid",
+    //     fgColor: { argb: "FFC0C0C0" }, // 表头背景色 #c0c0c0
+    //   };
+    //   cell.alignment = {
+    //     vertical: "middle",
+    //     horizontal: "center",
+    //     wrapText: true, // 启用自动换行
+    //   };
+    // });
+
+    // // 添加数据行
+    // exportData.forEach((rowData) => {
+    //   worksheet.addRow(rowData);
+    // });
+
+    // // 导出文件
+    // workbook.xlsx
+    //   .writeBuffer()
+    //   .then((buffer) => {
+    //     const blob = new Blob([buffer], {
+    //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //     });
+    //     const fileName = `导出数据_${dayjs().format(
+    //       "YYYY-MM-DD HH:mm:ss"
+    //     )}.xlsx`;
+    //     saveAs(blob, fileName);
+    //     this.$message.success(`成功导出 ${this.selectedRows.length} 条数据`);
+    //   })
+    //   .catch((error) => {
+    //     console.error("导出失败:", error);
+    //     this.$message.error("导出失败，请重试");
+    //   });
+    // },
+    //导出勾选数据+样式
+    // exportSelectedToLocal() {
+    //   // 准备数据
+    //   console.log(this.selectedRows[0].list);
+    //   const exportData = this.selectedRows[0].list.map((row) => ({
+    //     物品编码: row.code || "",
+    //     商品名称: row.name || "",
+    //     入库数量: row.amount || "",
+    //     入库单价: row.price || "",
+    //     入库金额: row.price * row.amount || "",
+    //     商品条码: row.barCode || "",
+    //     规格型号: row.specification || "",
+    //     安全库存下限: row.lowerSize || "",
+    //     安全库存上限: row.upperSize || "",
+    //     备注: row.remark || "",
+    //     照片: row.image || "",
+    //   }));
+    //   //创建 workbook 和 worksheet
+    //   const workbook = new ExcelJS.Workbook();
+    //   const worksheet = workbook.addWorksheet("数据");
+
+    //   // 定义列（顺序与 exportData 一致）
+    //   const columns = Object.keys(exportData[0] || []);
+    //   worksheet.columns = columns.map((key) => ({
+    //     header: key,
+    //     key: key,
+    //     width: 11, // 设置默认列宽
+    //   }));
+
+    //   // 设置表头样式（第1行）
+    //   const headerRow = worksheet.getRow(1);
+    //   headerRow.eachCell((cell) => {
+    //     cell.font = {
+    //       name: "SimSun", // 宋体
+    //       size: 14,
+    //       bold: true,
+    //     };
+    //     cell.fill = {
+    //       type: "pattern",
+    //       pattern: "solid",
+    //       fgColor: { argb: "FFC0C0C0" }, // 表头背景色 #c0c0c0
+    //     };
+    //     cell.alignment = {
+    //       vertical: "middle",
+    //       horizontal: "center",
+    //       wrapText: true, // 启用自动换行
+    //     };
+    //   });
+
+    //   // 添加数据行
+    //   exportData.forEach((rowData) => {
+    //     worksheet.addRow(rowData);
+    //   });
+
+    //   // 导出文件
+    //   workbook.xlsx
+    //     .writeBuffer()
+    //     .then((buffer) => {
+    //       const blob = new Blob([buffer], {
+    //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //       });
+    //       const fileName = `导出数据_${dayjs().format(
+    //         "YYYY-MM-DD HH:mm:ss"
+    //       )}.xlsx`;
+    //       saveAs(blob, fileName);
+    //       this.$message.success(`成功导出 ${this.selectedRows.length} 条数据`);
+    //     })
+    //     .catch((error) => {
+    //       console.error("导出失败:", error);
+    //       this.$message.error("导出失败，请重试");
+    //     });
+    // },
+
+    async exportSelectedToLocal() {
+      // 检查是否有选中数据
+      if (!this.selectedRows?.length || !this.selectedRows[0]?.list?.length) {
+        this.$message.warning("请先选择要导出的数据");
         return;
       }
-      // 👇 步骤1：准备要导出的“干净数据”，按表格列顺序映射
-      const exportData = this.selectedRows.map((row) => ({
-        单据编号: row.code || "",
-        单据类型:
-          row.type === "0" ? "入库单据" : row.type === "1" ? "出库单据" : "",
-        创建人: row.creatorName || "",
-        审批状态:
-          row.status === 0 ? "已审批" : row.status === 1 ? "待审批" : "",
-        创建时间: row.createDate || "",
-        备注: row.remark || "",
-        // ⚠️ 请根据你实际表格列和字段名修改上面的 key 和 value
-        // 例如：如果你的“单据编号”字段是 orderNo → '单据编号': row.orderNo
-      }));
 
-      // 👇 步骤2：创建工作表
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      // 后端图片服务基础地址
+      //window.$EXCEL_URL + 
+      // const IMAGE_BASE_URL = "http://192.168.11.137:20170/upload/image";
+      const IMAGE_BASE_URL = window.$EXCEL_URL + "image";
 
-      // 👇 可选：设置列宽
-      worksheet["!cols"] = [
-        { wch: 20 }, // 单据编号
-        { wch: 15 }, // 单据类型
-        { wch: 12 }, // 创建人
-        { wch: 12 }, // 审批状态
-        { wch: 20 }, // 创建时间
-        { wch: 30 }, // 备注
+      const list1 = this.selectedRows[0].list || [];
+      const list2 = this.selectedRows[0].details || [];
+
+      // 构建 details 的 Map（以 substanceId 为 key）
+      const list2Map = new Map();
+      list2.forEach((item) => {
+        if (item.substanceId) {
+          list2Map.set(item.substanceId, item);
+        }
+      });
+
+      // 准备导出数据，确保照片字段为完整 URL
+      const exportData = list1.map((row) => {
+        const extra = list2Map.get(row.substanceId) || {};
+        let imageUrl = row.image || "";
+        if (imageUrl && !imageUrl.startsWith("http")) {
+          imageUrl = imageUrl.startsWith("/")
+            ? IMAGE_BASE_URL + imageUrl
+            : IMAGE_BASE_URL + "/" + imageUrl;
+        }
+        return {
+          物品编码: row.code || "",
+          商品名称: row.name || "",
+          入库数量: extra.amount || "",
+          入库单价: extra.price || "",
+          入库金额: extra.money || "",
+          商品条码: row.barCode || "",
+          规格型号: row.specification || "",
+          安全库存下限: row.lowerSize || "",
+          安全库存上限: row.upperSize || "",
+          备注: row.remark || "",
+          照片: imageUrl,
+        };
+      });
+
+      // 创建 workbook 和 worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("入库数据");
+
+      // 定义所有列（包含“照片”）
+      const dataColumns = [
+        "物品编码",
+        "商品名称",
+        "入库数量",
+        "入库单价",
+        "入库金额",
+        "商品条码",
+        "规格型号",
+        "安全库存下限",
+        "安全库存上限",
+        "备注",
+        "照片", // 表头列
       ];
 
-      // 👇 可选：标题行加粗
-      const range = XLSX.utils.decode_range(worksheet["!ref"]);
-      for (let C = range.s.c; C <= range.e.c; ++C) {
-        const address = XLSX.utils.encode_col(C) + "1";
-        if (!worksheet[address]) continue;
-        worksheet[address].s = { font: { bold: true } };
+      // 设置列宽
+      worksheet.columns = dataColumns.map((key) => ({
+        header: key,
+        key: key,
+        width: key === "照片" ? 20 : 14,
+      }));
+
+      // 表头样式（无边框）
+      const headerRow = worksheet.getRow(1);
+      headerRow.height = 24;
+      headerRow.eachCell((cell) => {
+        cell.font = { name: "SimSun", size: 14, bold: true };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFC0C0C0" },
+        };
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+          wrapText: true,
+        };
+      });
+
+      // 添加数据行（照片列留空，不显示 URL）
+      const textColumns = dataColumns.slice(0, -1); // 前10列
+      exportData.forEach((rowData) => {
+        const values = textColumns.map((col) => rowData[col]);
+        values.push(""); // 第11列（照片）留空
+        const row = worksheet.addRow(values);
+        row.height = 80;
+        row.eachCell((cell) => {
+          cell.alignment = {
+            vertical: "middle",
+            horizontal: "center",
+            wrapText: true,
+          };
+        });
+      });
+
+      // 异步嵌入图片到“照片”列（第11列）
+      for (let i = 0; i < exportData.length; i++) {
+        const imageUrl = exportData[i].照片;
+        if (!imageUrl) continue;
+
+        try {
+          const response = await fetch(imageUrl, {
+            method: "GET",
+            mode: "cors",
+          });
+
+          if (!response.ok) {
+            console.warn(`图片请求失败 [${response.status}]:`, imageUrl);
+            continue;
+          }
+
+          const contentType =
+            response.headers.get("content-type") || "image/png";
+          const extMatch = contentType.match(/image\/(jpeg|png|gif|bmp|webp)/);
+          const extension = extMatch ? extMatch[1] : "png";
+
+          const arrayBuffer = await response.arrayBuffer();
+
+          const imageId = workbook.addImage({
+            buffer: arrayBuffer,
+            extension: extension,
+          });
+
+          // 插入到第11列（K列），行号 i + 2（第1行为表头）
+          worksheet.addImage(imageId, {
+            tl: { col: 10, row: i + 1 }, // 0-based: 第11列 = index 10
+            br: { col: 11, row: i + 2 },
+            editAs: "oneCell",
+          });
+        } catch (error) {
+          console.error(`嵌入图片失败:`, imageUrl, error);
+          worksheet.getCell(`K${i + 2}`).value = "图片加载失败";
+        }
       }
-
-      // 👇 步骤3：创建工作簿
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "数据");
-
-      // 👇 步骤4：生成文件
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      // 👇 步骤5：下载文件
-      const fileName = `导出数据_${dayjs().format('YYYY-MM-DD HH:mm:ss')}.xlsx`;
-      saveAs(blob, fileName);
-
-      this.$message.success(`成功导出 ${this.selectedRows.length} 条数据`);
+      // 导出文件
+      try {
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const fileName = `入库物品明细导出_${dayjs().format(
+          "YYYYMMDD_HHmmss"
+        )}.xlsx`;
+        saveAs(blob, fileName);
+        // ${exportData.length} 条
+        this.$message.success(`成功导出入库物品明细数据`);
+        // this.$message.success(`导出成功`);
+      } catch (err) {
+        console.error("Excel 导出失败:", err);
+        this.$message.error("导出失败，请重试");
+      }
     },
+
     // 获取资产属性
     // async getAssetAttr() {
     //   const { data: res } = await select({

@@ -37,6 +37,7 @@ const Payment = () => import("@/views/PurchaseMange/Payment");
 const PaymentRecord = () => import("@/views/PurchaseMange/PaymentRecord");
 const PruSetting = () => import("@/views/PurchaseMange/Settings");
 const SKU = () => import("@/views/PurchaseMange/Settings/SKU");
+//供应商管理
 const Vendor = () => import("@/views/PurchaseMange/Settings/Vendor");
 // 系统管理
 const SystemSetting = () => import("@/views/SystemSetting");
@@ -451,6 +452,16 @@ const dynamicRoutes = [
         },
         component: Staff,
       },
+      //新增：供应商管理
+      {
+        path: "/SystemSetting/Vendor",
+        name: "Vendor",
+        meta: {
+          name: "供应商管理",
+          icon: "",
+        },
+        component: Vendor,
+      },
       {
         path: "/SystemSetting/Dict",
         name: "Dict",
@@ -460,6 +471,7 @@ const dynamicRoutes = [
         },
         component: Dict
       },
+
     ],
   },
   {

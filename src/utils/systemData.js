@@ -3610,10 +3610,10 @@ export const inventoryColumns = [
   },
   {
     prop: "useDate",
-    label: i18n.t('h.enteringWarehouseDate'),
+    label: i18n.t('h.formTips80'),
     fixed: false,
     showOverflowTooltip: true,
-    width: countTableHeaderWidth(i18n.t('h.enteringWarehouseDate')),
+    width: countTableHeaderWidth(i18n.t('h.formTips80')),
   },
   {
     prop: "vendName",
@@ -3631,10 +3631,10 @@ export const inventoryColumns = [
   },
   {
     prop: "createDate",
-    label: i18n.t('h.formTips68'),
+    label: i18n.t('h.enteringWarehouseDate'),
     fixed: false,
     showOverflowTooltip: true,
-    width: countTableHeaderWidth(i18n.t('h.formTips68')),
+    width: countTableHeaderWidth(i18n.t('h.enteringWarehouseDate')),
   },
   //验收结论
   {

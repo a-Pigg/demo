@@ -6,6 +6,7 @@
         :before-leave="tabsClassBeforeLeave"
         class="task-tabs-box"
       >
+        <!-- 资产 -->
         <el-tab-pane :label="$t('h.asset')" name="asset">
           <el-tabs
             v-model="activeName"
@@ -136,12 +137,14 @@
             </el-tab-pane>
           </el-tabs>
         </el-tab-pane>
+        <!-- 物资 -->
         <el-tab-pane :label="$t('h.material')" name="article">
           <el-tabs
             v-model="articleActiveName"
             :before-leave="articleTabsBeforeLeave"
             class="task-tabs"
           >
+            <!-- 待审核 -->
             <el-tab-pane :label="$t('h.pending')" name="pending">
               <div class="pending-header">
                 <ds-query-form>
@@ -909,9 +912,10 @@ export default {
       this.articleSelectpendingBills = val;
 
       let requestBills = sortArr(this.articleSelectpendingBills, "type");
-      console.log("bbbbbbbbbb", requestBills);
+      let requestBills2 = sortArr(this.articleSelectpendingBills, "typeStr");
+      console.log("sortArr排序type", requestBills);
+      console.log("sortArr排序typeStr", requestBills2);
       console.log("多选", this.articleSelectpendingBills);
-
     },
     getArticleFinishedBills() {
       this.articleFinishedLoading = true;
@@ -1043,16 +1047,16 @@ export default {
     //通过审核
     articleResolvelPendingBills() {
       this.articlePendingLoading = true;
-      console.log("通过审核", this.articleSelectpendingBills);
-      // let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
-      let requestBills = sortArr(this.articleSelectpendingBills, "type");
-
+      console.log("通过审核前", this.articleSelectpendingBills);
+      let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
+      // let requestBills = sortArr(this.articleSelectpendingBills, "type");
+      console.log("通过审核", this.requestBills);
       let passPromises = [];
       requestBills.forEach((item) => {
         let housOutIds = [];
         let types = "";
         item.forEach((el, index) => {
-          //判断审核类型 出库 入库 调拨 
+          //判断审核类型 出库 入库 调拨
           if (index == 0 && el.roleRule.slice(0, 3) == "CYS") {
             types = "TK";
           } else if (index == 0 && el.roleRule.slice(0, 3) == "CIS") {
@@ -1102,7 +1106,6 @@ export default {
               });
           })
         );
-
       });
       Promise.allSettled(passPromises).then((res) => {
         let errorArr = res.filter((item) => item.status == "rejected");
@@ -1125,7 +1128,6 @@ export default {
           this.$message.success(this.$t("h.tips181"));
         }
       });
-
     },
     articleRejectPendingBills() {
       this.articlePendingLoading = true;
