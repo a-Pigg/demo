@@ -36,16 +36,19 @@ export default {
     };
   },
   props: {
+    //模板
     voucherPrintTempList: {
       type: Array,
       default() {
         return [];
       },
     },
+    //标题
     title: {
       type: String,
       default: "单据模板",
     },
+    //模板id
     selectId: {
       type: [String, Number],
     },

@@ -235,6 +235,78 @@ export const createVoucherTags = (
     });
 };
 
+
+// export const createVoucherTags = (
+//   canvas,
+//   rootJSON,
+//   tableFlag,
+//   tableData,
+//   assetData
+// ) => {
+//   const dpi = rootJSON.resolution; //打印鸡dpi
+//   const canvasWidth = (rootJSON.width / 25.4) * dpi; //画布宽度
+//   const canvasHeight = (rootJSON.height / 25.4) * dpi; //画布高度
+//   const imageStartX = (rootJSON.xorg / 25.4) * dpi; //图片在画布中的起点位置X
+//   const imageStartY = (rootJSON.yorg / 25.4) * dpi; //图片在画布中的起点位置Y
+//   const transitionPX = 25.4 / dpi;
+//   // 设置画布
+//   canvas.style["display"] = "block";
+//   canvas.style.background = "#fff";
+//   canvas.width = canvasWidth;
+//   canvas.height = canvasHeight;
+//   // 开始绘画 tips:需先给画布渲染一层白色矩形,不然打印效果会为全黑
+//   const ctx = canvas.getContext("2d");
+//   ctx.fillStyle = "#fff";
+//   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+//   const img = new Image();
+//   img.src = rootJSON.txImg;
+//   return new Promise((resolve, reject) => {
+//     img.onload = function () {
+//       ctx.drawImage(img, imageStartX, imageStartY);
+//       if (rootJSON.bkImg) {
+//         const logoImg = new Image();
+//         logoImg.src = rootJSON.bkImg;
+//         logoImg.onload = function () {
+//           ctx.drawImage(logoImg, 0, 0);
+//           resolve();
+//         };
+//       }
+//       ctx.font = `${rootJSON.fontSize}px ${rootJSON.fontFace}`;
+//       resolve();
+//     };
+//   })
+//     .then(() => {
+//       return new Promise((resolve, reject) => {
+//         function recVoucherImg(i) {
+//           const itemInfo = rootJSON.item[i];
+//           // === 临时注释开始 ===
+//           /*
+//           // 开始填充内容
+//           if (itemInfo.type == "text") {
+//             ...
+//             // 所有与文本绘制相关的逻辑都被注释掉了。
+//           } else if (itemInfo.type == "table") {
+//             ...
+//             // 所有与表格绘制相关的逻辑都被注释掉了。
+//           }
+//           */
+//           // === 临时注释结束 ===
+//           if (i < rootJSON.item.length - 1) {
+//             i += 1;
+//             recVoucherImg(i);
+//           } else {
+//             resolve(canvas.toDataURL("image/png"));
+//           }
+//         }
+//         recVoucherImg(0);
+//       });
+//     })
+//     .then((base64) => {
+//       return new Promise((resolve, reject) => {
+//         resolve(base64);
+//       });
+//     });
+// };
 /**
  * @description：生成画布
  * @param {*} width  画布的宽度

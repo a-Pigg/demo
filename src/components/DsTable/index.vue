@@ -289,7 +289,7 @@ export default {
     },
     // 多选
     handleSelectionChange(val) {
-      // console.log('多选',val)
+      console.log('多选',val)
       if (this.tableConfig.tableConfig && val.length > 1) {
         const newRows = val.filter((it, index) => {
           if (index == val.length - 1) {

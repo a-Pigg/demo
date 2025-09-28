@@ -57,6 +57,12 @@
                 <el-input v-model="assetForm.code"></el-input>
               </el-form-item>
             </el-col>
+            <!-- 物资批号 -->
+            <!-- <el-col :span="12">
+              <el-form-item :label="$t('h.title166up')" prop="code">
+                <el-input v-model="assetForm.code"></el-input>
+              </el-form-item>
+            </el-col> -->
             <el-col :span="12">
               <el-form-item :label="$t('h.formTips38')" prop="name">
                 <el-input v-model="assetForm.name"></el-input>
@@ -110,13 +116,12 @@
                 <el-input v-model="assetForm.logo"></el-input>
               </el-form-item>
             </el-col>
-
             <el-col :span="12">
               <!-- 生产日期 -->
-              <el-form-item :label="'生产日期'" prop="productionDate">
+              <el-form-item :label="$t('h.formTips82')" prop="productionDate">
                 <el-date-picker
                   type="date"
-                  :placeholder="$t('h.tips4') + '生产日期'"
+                  :placeholder="$t('h.tips4') + $t('h.formTips82')"
                   v-model="assetForm.productionDate"
                   style="width: 100%"
                   clearable
@@ -126,10 +131,10 @@
             </el-col>
             <el-col :span="12">
               <!-- 失效日期 -->
-              <el-form-item :label="'失效日期'" prop="expirationDate">
+              <el-form-item :label="$t('h.formTips83')" prop="expirationDate">
                 <el-date-picker
                   type="date"
-                  :placeholder="$t('h.tips4') + '失效日期'"
+                  :placeholder="$t('h.tips4') + $t('h.formTips83')"
                   v-model="assetForm.expirationDate"
                   style="width: 100%"
                   clearable
@@ -137,14 +142,13 @@
                 ></el-date-picker>
               </el-form-item>
             </el-col>
-
             <el-col :span="12">
-              <el-form-item :label="'是否采集'" prop="acquisitionStatus">
+              <el-form-item :label="$t('h.formTips84')" prop="acquisitionStatus">
                 <el-select
                   filterable
                   clearable
                   v-model="assetForm.acquisitionStatus"
-                  :placeholder="$t('h.tips4') + '是否采集'"
+                  :placeholder="$t('h.tips4') + $t('h.formTips84')"
                 >
                   <el-option
                     v-for="item in acquisitionStatus"

@@ -1116,7 +1116,7 @@ export default {
         this.$refs.articleData.clearSelection();
       }
     },
-    //获取打印模板数据
+    //获取打印模板数据 —— 出库
     getBillPrintTemplate() {
       select({
         func: "S0034",

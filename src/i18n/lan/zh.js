@@ -85,6 +85,7 @@ export default {
         Dept: "组织架构",
         Roles: "角色信息",
         Staff: "员工信息",
+        Manufacturer: "生产厂家",
         Dict: "字典",
         // 
         ApprovalMange: "审核管理",
@@ -394,6 +395,7 @@ export default {
         dictionaryItemList: "字典项列表",
         supplierInformation: "供应商信息",
         supplier: "供应商",
+        manufacturerFullName:"厂家全称",
         receivingBank: "收款银行",
         bankAccount: "银行账号",
         totalPaymentAmount: "付款总额",
@@ -907,6 +909,7 @@ export default {
         title164: "选择年份",
         title165: "导出",
         title166: "物品编码",
+        title166up: "物资批号",
         title167: "仓库不存在或已删除",
         title168: "调拨单",
         title169: "已被盘点单锁定，不允许操作!",
@@ -1076,11 +1079,14 @@ export default {
         formTips79: "调整仓库",
         formTips80: "业务日期",
         formTips81: "物品属性",
-        formTips82: "",
-        formTips83: "",
-        formTips84: "",
+        //新增
+        formTips82: "生产日期",
+        formTips83: "失效日期",
+        formTips84: "是否采集",
         formTips85: "验收结论",
         formTips86: "入库方式",
+        formTips87: "厂家简称",
+        formTips88: "注册编码",
 
         //标签
         label1: "标签一",

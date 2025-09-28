@@ -1,5 +1,6 @@
 <template>
   <div class="Warehousing">
+    <!-- <button @click="a">点</button> -->
     <el-card class="card">
       <!-- 头部 -->
       <div class="header">
@@ -113,6 +114,7 @@
                   <!-- 入库仓库 -->
                   <el-form-item :label="$t('h.columns50')" prop="houseId">
                     <el-cascader
+                      @change="change"
                       :options="warehouseData"
                       :props="{ checkStrictly: true }"
                       v-model="pushWarehouseData.houseId"
@@ -148,8 +150,24 @@
                 </el-col>
                 <el-col :span="12">
                   <!-- 供应商信息 -->
-                  <el-form-item :label="$t('h.supplier')" prop="vendName">
+                  <!-- <el-form-item :label="$t('h.supplier')" prop="vendName">
                     <el-input v-model="pushWarehouseData.vendName"></el-input>
+                  </el-form-item> -->
+                  <el-form-item :label="$t('h.supplier')" prop="vendName">
+                    <el-select
+                      v-model="pushWarehouseData.vendorId"
+                      filterable
+                      placeholder="请选择"
+                      @change="change"
+                    >
+                      <el-option
+                        v-for="item in vendors"
+                        :key="item.id"
+                        :label="item.vendName"
+                        :value="item.vendorId"
+                      >
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -638,6 +656,7 @@
       </ds-filter-drawer>
       <!-- 打印 -->
       <!-- @setVoucherTag="setBillPrintTemplate" -->
+      <!-- 模板设置 -->
       <bill-print-template
         ref="vptRef"
         :title="`${$t('h.formTips75')}`"
@@ -705,6 +724,7 @@ export default {
       //打印模板
       warehousingTemplateId: "",
       billPrintTemplate: [],
+      billPrintTemplate2: [],
       //用户
       userId: "",
       token: "",
@@ -752,6 +772,7 @@ export default {
         houseId: [],
         useDate: getTodayDate(),
         vendName: "",
+        // vendorId: "",
         staffName: JSON.parse(sessionStorage.getItem("vuex")).userInfo
           .staffName,
         createDate: getTodayDate(),
@@ -819,6 +840,7 @@ export default {
       waitFilesData: false,
       // 导出——存储用户勾选的行
       selectedRows: [],
+      vendors: [],
     };
   },
   computed: {
@@ -879,6 +901,41 @@ export default {
     },
   },
   methods: {
+    change() {
+      console.log("更改的数据", this.pushWarehouseData);
+    },
+    // a(){
+    //   console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',this.billPrintTemplate[0].txImg)
+    //   this.billPrintTemplate[0].txImg = this.billPrintTemplate2[0].txImg
+    //   console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',this.billPrintTemplate[0].txImg)
+    // },
+    // 获取供应商
+    getVendors() {
+      select({
+        func: "S0061",
+        userId: this.userInfo._id,
+        token: this.userInfo.token,
+        requstData: {
+          page: this.paginationForm.pageSize,
+          index: this.paginationForm.currentPage,
+        },
+      })
+        .then(({ data }) => {
+          if (data.code != 0) return this.$message.error(data.data);
+          // this.total = data.data[0];
+          this.vendors = data.data[1];
+          this.vendors = this.vendors.map((item) => ({
+            ...item,
+            vendorId: item.id,
+            vendName: item.name,
+          }));
+          console.log("获取供应商", this.vendors);
+        })
+        .catch(() => {
+          // 服务器网络错误，请求供应商失败
+          this.$message.error(this.$t("h.tips18"));
+        });
+    },
     toggleSelection(rows) {
       if (rows) {
         rows.forEach((row) => {
@@ -902,7 +959,7 @@ export default {
     openPrintSet() {
       this.$refs["vptRef"].printTempDialogVisible = true;
     },
-    //获取打印模板数据  —— 出库
+    //获取打印模板数据  —— 入库
     getBillPrintTemplate() {
       select({
         func: "S0034",
@@ -915,6 +972,7 @@ export default {
         .then(({ data }) => {
           if (data.code != 0) return this.$message.error(data.data);
           this.billPrintTemplate = data.data;
+          console.log("billPrintTemplate---", this.billPrintTemplate);
           this.warehousingTemplateId = localStorage.getItem(
             "warehousingTemplateId"
           );
@@ -934,6 +992,34 @@ export default {
           this.$message.error(this.$t("h.tips119"));
         });
     },
+    // —— 出库
+    // getBillPrintTemplate2() {
+    //   select({
+    //     func: "S0034",
+    //     userId: this.userInfo._id,
+    //     token: this.userInfo.token,
+    //     requstData: {
+    //       type: "CRE",
+    //     },
+    //   })
+    //     .then(({ data }) => {
+    //       if (data.code != 0) return this.$message.error(data.data);
+    //       this.billPrintTemplate2 = data.data;
+    //       console.log('billPrintTemplate2',this.billPrintTemplate2)
+    //       // this.outboundTemplateId = localStorage.getItem("outboundTemplateId");
+    //       // if (
+    //       //   !this.billPrintTemplate2.some(
+    //       //     (item) => item._id == this.outboundTemplateId
+    //       //   )
+    //       // ) {
+    //       //   this.outboundTemplateId = this.billPrintTemplate2[0]._id;
+    //       //   localStorage.setItem("outboundTemplateId", this.outboundTemplateId);
+    //       // }
+    //     })
+    //     .catch(() => {
+    //       this.$message.error(this.$t("h.tips119"));
+    //     });
+    // },
     //删除用户高级筛选填写数据
     articleHandleCloseFilterTag(val) {
       this.waitFilesData = true;
@@ -1228,40 +1314,133 @@ export default {
       }, 100);
     },
     //获取仓库数据
-    getWarehouseData() {
-      warehouseOperate({
-        func: "ST0001",
-        userId: this.userId,
-        token: this.token,
-        requstData: {},
-      })
-        .then(({ data }) => {
-          if (data.code == "-1") return this.$message.error(data.data);
-          if (data.data) {
-            let arr = [];
-            data.data.forEach((item) => {
-              if (!item.disabled && item.state == "0") {
-                arr.push({
-                  name: item.name,
-                  label: item.name,
-                  value: item.houseId,
-                  state: item.state,
-                  subId: item.subId,
-                });
-              }
-              this.houseNameData.push({
-                name: item.name,
-                value: item.houseId,
-                state: item.state,
-              });
+    // getWarehouseData() {
+    //   warehouseOperate({
+    //     func: "ST0001",
+    //     userId: this.userId,
+    //     token: this.token,
+    //     requstData: {},
+    //   })
+    //     .then(({ data }) => {
+    //       console.log("data->data", data.data);
+    //       if (data.code == "-1") return this.$message.error(data.data);
+    //       if (data.data) {
+    //         let arr = [];
+    //         data.data.forEach((item) => {
+    //           if (!item.disabled && item.state == "0") {
+    //             arr.push({
+    //               name: item.name,
+    //               label: item.name,
+    //               value: item.houseId,
+    //               state: item.state,
+    //               subId: item.subId,
+    //             });
+    //           }
+    //           this.houseNameData.push({
+    //             name: item.name,
+    //             value: item.houseId,
+    //             state: item.state,
+    //           });
+    //         });
+    //         this.warehouseData = this.tree(arr, "-");
+    //       }
+    //       console.log("houseNameData--", this.houseNameData);
+    //       console.log("warehouseData--", this.warehouseData);
+    //     })
+    //     .catch((error) => {
+    //       this.$message.error(error);
+    //     });
+    // },
+getWarehouseData() {
+  warehouseOperate({
+    func: "ST0001",
+    userId: this.userId,
+    token: this.token,
+    requstData: {},
+  })
+    .then(({ data }) => {
+      if (data.code == "-1") {
+        return this.$message.error(data.data);
+      }
+
+      if (data.data) {
+        // 1. 准备用于树形结构的数组（只包含启用且未禁用的仓库）
+        const treeNodes = [];
+        this.houseNameData = []; // 清空，避免重复添加
+
+        data.data.forEach((item) => {
+          // 无论是否禁用，都加入 houseNameData（扁平列表）
+          this.houseNameData.push({
+            name: item.name,
+            value: item.houseId,
+            state: item.state,
+          });
+
+          // 只将启用且未禁用的节点加入树形结构
+          if (!item.disabled && item.state == "0") {
+            treeNodes.push({
+              label: item.name, // el-tree 默认用 label 显示
+              value: item.houseId, // 用 houseId 作为唯一值
+              state: item.state,
+              subId: item.subId,
+              children: [], // 初始化 children
+              code: item.code,
+              disabled: item.disabled,
             });
-            this.warehouseData = this.tree(arr, "-");
           }
-        })
-        .catch((error) => {
-          this.$message.error(error);
         });
-    },
+
+        // 2. 构建树形结构（核心逻辑）
+        const rootValue = "-"; // 根节点标识
+        const map = {};
+        const roots = [];
+
+        treeNodes.forEach((node) => {
+          map[node.value] = node;
+        });
+
+        treeNodes.forEach((node) => {
+          if (node.subId === rootValue) {
+            roots.push(node);
+          } else {
+            const parent = map[node.subId];
+            if (parent) {
+              parent.children.push(node);
+            }
+          }
+        });
+
+        // 3. 清理空的 children 属性：如果 children 存在但为空数组，则删除该属性
+        const removeEmptyChildren = (nodes) => {
+          nodes.forEach(node => {
+            if (node.children && Array.isArray(node.children)) {
+              if (node.children.length === 0) {
+                // 删除 children 属性
+                delete node.children;
+              } else {
+                // 递归处理子节点
+                removeEmptyChildren(node.children);
+              }
+            }
+          });
+        };
+
+        // 执行清理
+        removeEmptyChildren(roots);
+
+        // 4. 赋值给响应式数据
+        this.warehouseData = roots;
+
+        // 5. 打印调试
+        console.log("扁平仓库列表--", this.houseNameData);
+        console.log("树形仓库结构--", this.warehouseData);
+      }
+    })
+    .catch((error) => {
+      console.error("获取仓库数据失败：", error);
+      this.$message.error("获取仓库数据失败：" + (error.message || "网络错误"));
+    });
+},
     //获取员工数据
     getEmployeeData() {
       select({
@@ -1611,7 +1790,8 @@ export default {
               staffId: this.staffId,
               deptId: deptId,
               type: "0", //传 0为入库单据  2为退库单据
-              vendName: this.pushWarehouseData.vendName,
+              // vendName: this.pushWarehouseData.vendName,
+              vendorId: this.pushWarehouseData.vendorId,
               houseId:
                 this.pushWarehouseData.houseId.length > 1
                   ? this.pushWarehouseData.houseId[
@@ -1644,18 +1824,41 @@ export default {
             userId: this.userId,
             token: this.token,
             requstData: {
+              // warehousingId: this.pushWarehouseData.warehousingId,
+              // createDate: this.pushWarehouseData.createDate,
+              // staffId: this.staffId,
+              // deptId: deptId,
+              // vendName: this.pushWarehouseData.vendName,
+              // houseId:
+              //   this.pushWarehouseData.houseId.length > 1
+              //     ? this.pushWarehouseData.houseId[
+              //         this.pushWarehouseData.houseId.length - 1
+              //       ]
+              //     : this.pushWarehouseData.houseId.join(),
+              // remark: this.pushWarehouseData.remark,
+              // details,
               warehousingId: this.pushWarehouseData.warehousingId,
               createDate: this.pushWarehouseData.createDate,
               staffId: this.staffId,
               deptId: deptId,
-              vendName: this.pushWarehouseData.vendName,
-              houseId:
-                this.pushWarehouseData.houseId.length > 1
+              // vendName: this.pushWarehouseData.vendName,
+              vendorId: this.pushWarehouseData.vendorId,
+              // houseId:
+              //   this.pushWarehouseData.houseId.length > 1
+              //     ? this.pushWarehouseData.houseId[
+              //         this.pushWarehouseData.houseId.length - 1
+              //       ]
+              //     : this.pushWarehouseData.houseId.join(),
+              houseId: Array.isArray(this.pushWarehouseData.houseId)
+                ? this.pushWarehouseData.houseId.length > 1
                   ? this.pushWarehouseData.houseId[
                       this.pushWarehouseData.houseId.length - 1
                     ]
-                  : this.pushWarehouseData.houseId.join(),
+                  : this.pushWarehouseData.houseId.join("")
+                : this.pushWarehouseData.houseId,
               remark: this.pushWarehouseData.remark,
+              acceptanceConclusion: this.pushWarehouseData.acceptanceConclusion,
+              receivingMethodId: this.pushWarehouseData.receivingMethodId,
               details,
             },
           })
@@ -1687,11 +1890,13 @@ export default {
         houseId: [],
         useDate: getTodayDate(),
         vendName: "",
+        vendorId: "",
         staffName: JSON.parse(sessionStorage.getItem("vuex")).userInfo
           .staffName,
         createDate: getTodayDate(),
         remark: "",
       };
+      console.log("关闭Dialog 后 pushWarehouseData", this.pushWarehouseData);
     },
     //获取入库单据
     getWarehousingDocuments() {
@@ -1729,6 +1934,7 @@ export default {
                 clearTimeout(timer);
               }
             }, 100);
+            console.log("assetTableData-----------", this.assetTableData);
           } else {
             this.assetTableData = [];
           }
@@ -2090,6 +2296,7 @@ export default {
         item.list[0].amount = item.details[0].amount;
         item.list[0].money = item.details[0].money;
       });
+      console.log("assetTableSelectData", this.assetTableSelectData);
     },
     //编辑操作
     editingOperations(command) {
@@ -2109,12 +2316,16 @@ export default {
         roleRule: this.assetTableSelectData[0].roleRule,
         houseId: this.assetTableSelectData[0].houseId,
         useDate: this.assetTableSelectData[0].useDate,
-        vendName: this.assetTableSelectData[0].vendName,
+        // vendName: this.assetTableSelectData[0].vendName,
+        vendorId: this.assetTableSelectData[0].vendorId,
         staffName: this.assetTableSelectData[0].staffId,
         createDate: this.assetTableSelectData[0].createDate,
         remark: this.assetTableSelectData[0].remark,
+        acceptanceConclusion: this.assetTableSelectData[0].acceptanceConclusion,
+        receivingMethodId: this.assetTableSelectData[0].receivingMethodId,
         warehousingId: this.assetTableSelectData[0].warehousingId,
       };
+      console.log("修改入库单据------------------", this.pushWarehouseData);
       this.articleDetailsData = this.assetTableSelectData[0].list;
       this.assetTableSelectData[0].details.forEach((item, index) => {
         this.articleDetailsData[index].amount = item.amount;
@@ -2176,6 +2387,7 @@ export default {
         houseId: row.houseId,
         useDate: row.useDate,
         vendName: row.vendName,
+        vendorId: row.vendorId,
         staffName: row.staffId,
         createDate: row.createDate,
         remark: row.remark,
@@ -2385,7 +2597,7 @@ export default {
       }
 
       // 后端图片服务基础地址
-      //window.$EXCEL_URL + 
+      //window.$EXCEL_URL +
       // const IMAGE_BASE_URL = "http://192.168.11.137:20170/upload/image";
       const IMAGE_BASE_URL = window.$EXCEL_URL + "image";
 
@@ -2604,7 +2816,10 @@ export default {
     this.getEmployeeData();
     this.warehousingTemplateId = localStorage.getItem("warehousingTemplateId");
     this.getBillPrintTemplate();
+    // this.getBillPrintTemplate2()
+    // console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',this.billPrintTemplate)
     // this.getAssetAttr();
+    this.getVendors();
   },
 };
 </script>

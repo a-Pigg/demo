@@ -189,7 +189,7 @@
         <!-- 新建档案数据填写 -->
         <!-- 
           modifyFileData  修改时传入的原始数据对象
-          attrData  商品属性下拉选项数据。//TODO  ??? 什么意思 ???
+          attrData  商品属性下拉选项数据。
           superiorSortingData 物品分类的级联数据
           functionChange  标识当前是“新增”还是“修改”模式。
          -->

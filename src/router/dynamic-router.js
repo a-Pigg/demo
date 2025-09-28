@@ -38,7 +38,8 @@ const PaymentRecord = () => import("@/views/PurchaseMange/PaymentRecord");
 const PruSetting = () => import("@/views/PurchaseMange/Settings");
 const SKU = () => import("@/views/PurchaseMange/Settings/SKU");
 //供应商管理
-const Vendor = () => import("@/views/PurchaseMange/Settings/Vendor");
+// const Vendor = () => import("@/views/PurchaseMange/Settings/Vendor");
+const Vendor = () => import("@/views/SystemSetting/Vendor");
 // 系统管理
 const SystemSetting = () => import("@/views/SystemSetting");
 const Area = () => import("@/views/SystemSetting/Area");
@@ -46,6 +47,7 @@ const Dept = () => import("@/views/SystemSetting/Dept");
 const Roles = () => import("@/views/SystemSetting/Roles");
 const Staff = () => import("@/views/SystemSetting/Staff");
 const Dict = () => import('@/views/SystemSetting/Dict')
+const Manufacturer = () => import('@/views/SystemSetting/Manufacturer')
 // RFID管理
 const RFIDMange = () => import('@/views/RFIDMange')
 const Device = () => import('@/views/RFIDMange/Device');
@@ -461,6 +463,16 @@ const dynamicRoutes = [
           icon: "",
         },
         component: Vendor,
+      },
+      //新增：生产厂家
+      {
+        path: "/SystemSetting/Manufacturer",
+        name: "Manufacturer",
+        meta: {
+          name: "生产厂家",
+          icon: "",
+        },
+        component: Manufacturer,
       },
       {
         path: "/SystemSetting/Dict",

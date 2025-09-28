@@ -2875,6 +2875,52 @@ export const vendorsColumns = [
     minWidth: countTableHeaderWidth(i18n.t('h.bankAccount')),
   },
 ];
+// 生产厂家表格表头
+export const manufacturersColumns = [
+  {
+    prop: "fullName",
+    label: i18n.t('h.manufacturerFullName'),
+    fixed: false,
+    showOverflowTooltip: true,
+    minWidth: countTableHeaderWidth(i18n.t('h.manufacturerFullName')),
+  },
+  {
+    prop: "abbreviation",
+    label: i18n.t('h.formTips87'),
+    fixed: false,
+    showOverflowTooltip: true,
+    minWidth: countTableHeaderWidth(i18n.t('h.formTips87')),
+  },
+  //  注册编码
+  {
+    prop: "registrationCode",
+    label: i18n.t('h.formTips88'),
+    fixed: false,
+    showOverflowTooltip: true,
+    minWidth: countTableHeaderWidth(i18n.t('h.formTips88')),
+  },
+  // {
+  //   prop: "email",
+  //   label: i18n.t('h.formTips50'),
+  //   fixed: false,
+  //   showOverflowTooltip: true,
+  //   minWidth: countTableHeaderWidth(i18n.t('h.formTips50')),
+  // },
+  // {
+  //   prop: "bankName",
+  //   label: i18n.t('h.formTips53'),
+  //   fixed: false,
+  //   showOverflowTooltip: true,
+  //   minWidth: countTableHeaderWidth(i18n.t('h.formTips53')),
+  // },
+  // {
+  //   prop: "bankAccount",
+  //   label: i18n.t('h.bankAccount'),
+  //   fixed: false,
+  //   showOverflowTooltip: true,
+  //   minWidth: countTableHeaderWidth(i18n.t('h.bankAccount')),
+  // },
+]
 export const filterCondtionData = [
   { value: "IS", label: i18n.t('h.equal') },
   { value: "NIS", label: i18n.t('h.Notequal') },
@@ -3870,9 +3916,11 @@ export const itemFileColumns = [
   {
     prop: "code",
     label: i18n.t('h.title166'),
+    // label: i18n.t('h.title166up'),
     fixed: false,
     showOverflowTooltip: true,
     width: countTableHeaderWidth(i18n.t('h.title166')),
+    // width: countTableHeaderWidth(i18n.t('h.title166up')),
   },
   {
     prop: "status",
@@ -4240,6 +4288,16 @@ export const articleApprovalBillsColumns = [
           default:
             return i18n.t('h.errorCode');
         }
+        //   switch (row["type"]) {
+        //   case "0":
+        //     return i18n.t('h.title222');
+        //   case "1":
+        //     return i18n.t('h.title223');
+        //   case "2":
+        //     return i18n.t('h.title224');
+        //   default:
+        //     return i18n.t('h.errorCode');
+        // }
       }
     },
   },

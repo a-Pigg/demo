@@ -1045,37 +1045,117 @@ export default {
       this.reasonDialogVisible = true;
     },
     //通过审核
+    // articleResolvelPendingBills() {
+    //   this.articlePendingLoading = true;
+    //   console.log("通过审核前", this.articleSelectpendingBills);
+    //   // let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
+    //   let passPromises = [];
+    //   requestBills.forEach((item) => {
+    //     let housOutIds = [];
+    //     let types = "";
+    //     // item.forEach((el, index) => {
+    //     //判断审核类型 出库 入库 调拨
+    //     if (index == 0 && el.roleRule.slice(0, 3) == "CYS") {
+    //       types = "TK";
+    //     } else if (index == 0 && el.roleRule.slice(0, 3) == "CIS") {
+    //       types = "RK";
+    //     } else if (index == 0 && el.roleRule.slice(0, 3) == "CRE") {
+    //       types = "CK";
+    //     } else if (index == 0 && el.roleRule.slice(0, 3) == "CAS") {
+    //       types = "TZ";
+    //     } else if (index == 0 && el.roleRule.slice(0, 3) == "CTR") {
+    //       types = "DB";
+    //     }
+    //     if (el.allocateId) {
+    //       housOutIds.push(el.allocateId);
+    //     } else if (el.adjustId) {
+    //       housOutIds.push(el.adjustId);
+    //     } else {
+    //       housOutIds.push(el.warehousingId);
+    //     }
+    //     // });
+    //     passPromises.push(
+    //       new Promise((resolve, reject) => {
+    //         warehouseOperate({
+    //           func: "EX0001",
+    //           userId: this.userInfo._id,
+    //           token: this.userInfo.token,
+    //           requstData: {
+    //             result: 0,
+    //             id: housOutIds.join(","),
+    //             types: types,
+    //             // permissonId: 67,
+    //           },
+    //         })
+    //           .then(({ data }) => {
+    //             if (data.code != 0)
+    //               reject({
+    //                 type: types,
+    //                 reason: data.data,
+    //               });
+    //             resolve(data);
+    //           })
+    //           .catch(() => {
+    //             reject({
+    //               type: types,
+    //               // 服务器网络错误，审核失败
+    //               reason: this.$t("h.tips18"),
+    //             });
+    //           });
+    //       })
+    //     );
+    //   });
+    //   Promise.allSettled(passPromises).then((res) => {
+    //     let errorArr = res.filter((item) => item.status == "rejected");
+    //     if (errorArr.length) {
+    //       errorArr.forEach((item) => {
+    //         this.articleDeleteErrorData.push(item.reason);
+    //       });
+    //       this.articlePendingPagForm.currentPage = 1;
+    //       this.getArticlePendingBills();
+    //       this.$refs["articlePendingTableRef"].$refs[
+    //         "dsTableRef"
+    //       ].clearSelection();
+    //       this.articleDeleteDialogVisible = true;
+    //     } else {
+    //       this.articlePendingPagForm.currentPage = 1;
+    //       this.getArticlePendingBills();
+    //       this.$refs["articlePendingTableRef"].$refs[
+    //         "dsTableRef"
+    //       ].clearSelection();
+    //       this.$message.success(this.$t("h.tips181"));
+    //     }
+    //   });
+    // },
+    //通过审核
     articleResolvelPendingBills() {
       this.articlePendingLoading = true;
       console.log("通过审核前", this.articleSelectpendingBills);
-      let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
-      // let requestBills = sortArr(this.articleSelectpendingBills, "type");
-      console.log("通过审核", this.requestBills);
+      let requestBills = this.articleSelectpendingBills; // 补上这行，否则 requestBills 未定义
       let passPromises = [];
       requestBills.forEach((item) => {
         let housOutIds = [];
         let types = "";
-        item.forEach((el, index) => {
-          //判断审核类型 出库 入库 调拨
-          if (index == 0 && el.roleRule.slice(0, 3) == "CYS") {
-            types = "TK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CIS") {
-            types = "RK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CRE") {
-            types = "CK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CAS") {
-            types = "TZ";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CTR") {
-            types = "DB";
-          }
-          if (el.allocateId) {
-            housOutIds.push(el.allocateId);
-          } else if (el.adjustId) {
-            housOutIds.push(el.adjustId);
-          } else {
-            housOutIds.push(el.warehousingId);
-          }
-        });
+
+        // 直接使用 item，不再遍历 item（因为 item 是单个对象）
+        if (item.roleRule.slice(0, 3) == "CYS") {
+          types = "TK";
+        } else if (item.roleRule.slice(0, 3) == "CIS") {
+          types = "RK";
+        } else if (item.roleRule.slice(0, 3) == "CRE") {
+          types = "CK";
+        } else if (item.roleRule.slice(0, 3) == "CAS") {
+          types = "TZ";
+        } else if (item.roleRule.slice(0, 3) == "CTR") {
+          types = "DB";
+        }
+        if (item.allocateId) {
+          housOutIds.push(item.allocateId);
+        } else if (item.adjustId) {
+          housOutIds.push(item.adjustId);
+        } else {
+          housOutIds.push(item.warehousingId);
+        }
         passPromises.push(
           new Promise((resolve, reject) => {
             warehouseOperate({
@@ -1129,33 +1209,117 @@ export default {
         }
       });
     },
+    //驳回审核
+    // articleRejectPendingBills() {
+    //   this.articlePendingLoading = true;
+    //   let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
+    //   let passPromises = [];
+    //   requestBills.forEach((item) => {
+    //     let housOutIds = [];
+    //     let types = "";
+    //     item.forEach((el, index) => {
+    //       if (index == 0 && el.roleRule.slice(0, 3) == "CYS") {
+    //         types = "TK";
+    //       } else if (index == 0 && el.roleRule.slice(0, 3) == "CIS") {
+    //         types = "RK";
+    //       } else if (index == 0 && el.roleRule.slice(0, 3) == "CRE") {
+    //         types = "CK";
+    //       } else if (index == 0 && el.roleRule.slice(0, 3) == "CAS") {
+    //         types = "TZ";
+    //       } else if (index == 0 && el.roleRule.slice(0, 3) == "CTR") {
+    //         types = "DB";
+    //       }
+    //       if (el.allocateId) {
+    //         housOutIds.push(el.allocateId);
+    //       } else if (el.adjustId) {
+    //         housOutIds.push(el.adjustId);
+    //       } else {
+    //         housOutIds.push(el.warehousingId);
+    //       }
+    //     });
+    //     passPromises.push(
+    //       new Promise((resolve, reject) => {
+    //         warehouseOperate({
+    //           func: "EX0001",
+    //           userId: this.userInfo._id,
+    //           token: this.userInfo.token,
+    //           requstData: {
+    //             result: -2,
+    //             id: housOutIds.join(","),
+    //             types: types,
+    //             // permissonId: 67,
+    //           },
+    //         })
+    //           .then(({ data }) => {
+    //             if (data.code != 0)
+    //               reject({
+    //                 type: types,
+    //                 reason: data.data,
+    //               });
+    //             resolve(data);
+    //           })
+    //           .catch(() => {
+    //             reject({
+    //               type: types,
+    //               // 服务器网络错误，审核失败
+    //               reason: this.$t("h.tips18"),
+    //             });
+    //           });
+    //       })
+    //     );
+    //   });
+    //   Promise.allSettled(passPromises).then((res) => {
+    //     let errorArr = res.filter((item) => item.status == "rejected");
+    //     if (errorArr.length) {
+    //       errorArr.forEach((item) => {
+    //         this.articleDeleteErrorData.push(item.reason);
+    //       });
+    //       this.articlePendingPagForm.currentPage = 1;
+    //       this.getArticlePendingBills();
+    //       this.$refs["articlePendingTableRef"].$refs[
+    //         "dsTableRef"
+    //       ].clearSelection();
+    //       this.articleDeleteDialogVisible = true;
+    //     } else {
+    //       this.articlePendingPagForm.currentPage = 1;
+    //       this.getArticlePendingBills();
+    //       this.$refs["articlePendingTableRef"].$refs[
+    //         "dsTableRef"
+    //       ].clearSelection();
+    //       this.$message.success(this.$t("h.tips270"));
+    //     }
+    //   });
+    // },
     articleRejectPendingBills() {
       this.articlePendingLoading = true;
-      let requestBills = sortArr(this.articleSelectpendingBills, "typeStr");
+      let requestBills = this.articleSelectpendingBills; // 单层数组
       let passPromises = [];
       requestBills.forEach((item) => {
         let housOutIds = [];
         let types = "";
-        item.forEach((el, index) => {
-          if (index == 0 && el.roleRule.slice(0, 3) == "CYS") {
-            types = "TK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CIS") {
-            types = "RK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CRE") {
-            types = "CK";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CAS") {
-            types = "TZ";
-          } else if (index == 0 && el.roleRule.slice(0, 3) == "CTR") {
-            types = "DB";
-          }
-          if (el.allocateId) {
-            housOutIds.push(el.allocateId);
-          } else if (el.adjustId) {
-            housOutIds.push(el.adjustId);
-          } else {
-            housOutIds.push(el.warehousingId);
-          }
-        });
+
+        // 直接使用 item，item 是单个单据对象
+        const prefix = item.roleRule?.slice(0, 3);
+        if (prefix === "CYS") {
+          types = "TK";
+        } else if (prefix === "CIS") {
+          types = "RK";
+        } else if (prefix === "CRE") {
+          types = "CK";
+        } else if (prefix === "CAS") {
+          types = "TZ";
+        } else if (prefix === "CTR") {
+          types = "DB";
+        }
+
+        if (item.allocateId) {
+          housOutIds.push(item.allocateId);
+        } else if (item.adjustId) {
+          housOutIds.push(item.adjustId);
+        } else {
+          housOutIds.push(item.warehousingId);
+        }
+
         passPromises.push(
           new Promise((resolve, reject) => {
             warehouseOperate({
@@ -1166,29 +1330,24 @@ export default {
                 result: -2,
                 id: housOutIds.join(","),
                 types: types,
-                // permissonId: 67,
               },
             })
               .then(({ data }) => {
-                if (data.code != 0)
-                  reject({
-                    type: types,
-                    reason: data.data,
-                  });
-                resolve(data);
+                if (data.code !== 0) {
+                  reject({ type: types, reason: data.data });
+                } else {
+                  resolve(data);
+                }
               })
               .catch(() => {
-                reject({
-                  type: types,
-                  // 服务器网络错误，审核失败
-                  reason: this.$t("h.tips18"),
-                });
+                reject({ type: types, reason: this.$t("h.tips18") });
               });
           })
         );
       });
+
       Promise.allSettled(passPromises).then((res) => {
-        let errorArr = res.filter((item) => item.status == "rejected");
+        let errorArr = res.filter((item) => item.status === "rejected");
         if (errorArr.length) {
           errorArr.forEach((item) => {
             this.articleDeleteErrorData.push(item.reason);
@@ -1207,6 +1366,7 @@ export default {
           ].clearSelection();
           this.$message.success(this.$t("h.tips270"));
         }
+        // this.articlePendingLoading = false; // 建议取消注释，关闭 loading
       });
     },
     reasonDialogVisibleClosed() {

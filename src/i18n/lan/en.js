@@ -86,6 +86,7 @@ export default {
         Dept: "Dept",
         Roles: "Roles",
         Staff: "Staff",
+        Manufacturer: "Manufacturer",
         Dict: "Dict",
         // 
         ApprovalMange: "ApprovalMange",
@@ -388,6 +389,7 @@ export default {
         dictionaryItemList: "Dictionary Item List",
         supplierInformation: "Supplier Information",
         supplier: "supplier",
+        manufacturerFullName:"Manufacturer FullName",
         receivingBank: "Receiving bank",
         bankAccount: "Bank account",
         totalPaymentAmount: "Total payment amount",
@@ -1076,11 +1078,14 @@ export default {
         formTips79: "Adjusting the warehouse",
         formTips80: "Business Date",
         formTips81: "Item attributes",
-        formTips82: "",
-        formTips83: "",
-        formTips84: "",
+        //新增
+        formTips82: "ProductionDate",
+        formTips83: "ExpirationDate",
+        formTips84: "AcquisitionStatus",
         formTips85: "Acceptance Conclusion",
         formTips86: "Receiving MethodId",
+        formTips87: "Manufacturer Abbreviation",
+        formTips88: "RegistrationCode",
 
 
         //标签

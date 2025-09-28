@@ -276,6 +276,7 @@ export default {
     },
   },
   props: {
+    // 打印数据
     voucherData: {
       type: Array,
       default() {
